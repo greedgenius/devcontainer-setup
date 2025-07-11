@@ -1,4 +1,4 @@
-.PHONY: help check-docker start-docker install-cli up exec shell down clean
+.PHONY: help check-docker start-docker install-cli up exec shell down clean claude_setup
 
 # Default target
 help:
@@ -11,6 +11,7 @@ help:
 	@echo "  make clean       - Remove the devcontainer and its volumes"
 	@echo "  make check-docker - Check if Docker is running"
 	@echo "  make start-docker - Start Docker Desktop"
+	@echo "  make claude_setup - Copy claude_commands to ~/.claude/commands/"
 
 # Check if Docker is running
 check-docker:
@@ -83,3 +84,10 @@ clean: check-docker
 	@docker ps -aq --filter "label=devcontainer.local_folder=$(PWD)" | xargs -r docker rm -f
 	@docker volume ls -q --filter "name=claude-code-bashhistory" | xargs -r docker volume rm
 	@echo "✓ Cleanup complete"
+
+# Setup Claude commands
+claude_setup:
+	@echo "Setting up Claude commands..."
+	@mkdir -p ~/.claude/commands
+	@cp -r claude_commands/* ~/.claude/commands/
+	@echo "✓ Claude commands copied to ~/.claude/commands/"

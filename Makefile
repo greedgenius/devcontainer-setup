@@ -1,14 +1,17 @@
-.PHONY: help check-docker start-docker install-cli up exec shell down clean claude_setup
+.PHONY: help check-docker start-docker install-cli up up-unsafe exec shell shell-unsafe down clean claude_setup logs
 
 # Default target
 help:
 	@echo "Available targets:"
 	@echo "  make install-cli  - Install Dev Containers CLI globally"
-	@echo "  make up          - Start Docker if needed and bring up the devcontainer"
+	@echo "  make up          - Start Docker if needed and bring up the devcontainer (with firewall)"
+	@echo "  make up-unsafe   - Start devcontainer with full internet access (no firewall)"
 	@echo "  make shell       - Open a shell in the running container"
+	@echo "  make shell-unsafe - Open a shell in the unsafe container"
 	@echo "  make exec CMD=<command> - Execute a command in the container"
 	@echo "  make down        - Stop the devcontainer"
 	@echo "  make clean       - Remove the devcontainer and its volumes"
+	@echo "  make logs        - Show container logs"
 	@echo "  make check-docker - Check if Docker is running"
 	@echo "  make start-docker - Start Docker Desktop"
 	@echo "  make claude_setup - Copy claude_commands to ~/.claude/commands/"
@@ -57,6 +60,14 @@ up: start-docker
 	@echo "✓ Devcontainer is running"
 	@echo "Tip: Run 'make shell' to open a shell in the container"
 
+# Start the unsafe devcontainer (with full internet access)
+up-unsafe: start-docker
+	@echo "WARNING: Starting devcontainer in UNSAFE mode with full internet access!"
+	@echo "This container can access any website and is less secure."
+	@UNSAFE_MODE=true devcontainer up --workspace-folder .
+	@echo "✓ Unsafe devcontainer is running"
+	@echo "Tip: Run 'make shell-unsafe' to open a shell in the unsafe container"
+
 # Execute a command in the container
 exec: check-docker
 	@if [ -z "$(CMD)" ]; then \
@@ -70,6 +81,11 @@ exec: check-docker
 # Open a shell in the container
 shell: check-docker
 	@echo "Opening shell in container..."
+	@devcontainer exec --workspace-folder . zsh
+
+# Open a shell in the unsafe container
+shell-unsafe: check-docker
+	@echo "Opening shell in UNSAFE container (full internet access)..."
 	@devcontainer exec --workspace-folder . zsh
 
 # Stop the devcontainer
@@ -91,3 +107,8 @@ claude_setup:
 	@mkdir -p ~/.claude/commands
 	@cp -r claude_commands/* ~/.claude/commands/
 	@echo "✓ Claude commands copied to ~/.claude/commands/"
+
+# Show container logs
+logs: check-docker
+	@echo "Showing container logs..."
+	@docker ps -q --filter "label=devcontainer.local_folder=$(PWD)" | xargs -r docker logs -f

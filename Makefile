@@ -1,4 +1,4 @@
-.PHONY: help check-docker start-docker install-cli up up-unsafe exec shell shell-unsafe down clean claude_setup logs
+.PHONY: help check-docker start-docker install-cli up up-unsafe exec shell shell-unsafe down clean claude_setup logs workspace
 
 # Default target
 help:
@@ -15,6 +15,7 @@ help:
 	@echo "  make check-docker - Check if Docker is running"
 	@echo "  make start-docker - Start Docker Desktop"
 	@echo "  make claude_setup - Copy claude_commands to ~/.claude/commands/"
+	@echo "  make workspace   - Create an empty workspace folder"
 
 # Check if Docker is running
 check-docker:
@@ -112,3 +113,9 @@ claude_setup:
 logs: check-docker
 	@echo "Showing container logs..."
 	@docker ps -q --filter "label=devcontainer.local_folder=$(PWD)" | xargs -r docker logs -f
+
+# Create an empty workspace folder
+workspace:
+	@echo "Creating workspace folder..."
+	@mkdir -p workspace
+	@echo "✓ Empty workspace folder created"

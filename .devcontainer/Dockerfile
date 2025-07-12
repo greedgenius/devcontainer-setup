@@ -42,8 +42,9 @@ RUN curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /
 RUN mkdir -p /usr/local/share/npm-global && \
   chown -R node:node /usr/local/share
 
-# Add node user to docker group for Docker socket access
-RUN groupadd docker || true && usermod -aG docker node
+# Add node user to the group that owns the Docker socket (GID 1)
+# This ensures Docker socket access works with the host's group
+RUN usermod -aG $(getent group 1 | cut -d: -f1) node
 
 ARG USERNAME=node
 
@@ -109,5 +110,6 @@ COPY init-firewall.sh /usr/local/bin/
 USER root
 RUN chmod +x /usr/local/bin/init-firewall.sh && \
   echo "node ALL=(root) NOPASSWD: /usr/local/bin/init-firewall.sh" > /etc/sudoers.d/node-firewall && \
+  echo "node ALL=(root) NOPASSWD: /bin/chgrp daemon /var/run/docker.sock" >> /etc/sudoers.d/node-firewall && \
   chmod 0440 /etc/sudoers.d/node-firewall
 USER node

@@ -97,7 +97,12 @@ USER root
 RUN mkdir -p /home/node/.config/nvim
 COPY nvim-init.lua /home/node/.config/nvim/init.lua
 RUN chown -R node:node /home/node/.config
+
+# Pre-install Treesitter parsers and plugins to avoid network dependency at runtime
 USER node
+RUN nvim --headless -c "lua require('lazy').setup({})" -c "qa" || true
+RUN nvim --headless -c "TSInstall markdown markdown_inline lua vim bash json yaml dockerfile javascript typescript python" -c "qa" || true
+USER root
 
 # Copy and set up firewall script
 COPY init-firewall.sh /usr/local/bin/

@@ -3,7 +3,7 @@ FROM node:20
 ARG TZ
 ENV TZ="$TZ"
 
-# Install basic development tools and iptables/ipset
+# Install basic development tools and iptables/ipset  
 RUN apt update && apt install -y less \
   git \
   procps \
@@ -22,7 +22,15 @@ RUN apt update && apt install -y less \
   jq \
   ca-certificates \
   curl \
-  neovim
+  wget
+
+# Install newer neovim (>= 0.8.0) from GitHub releases
+RUN ARCH=$(dpkg --print-architecture) && \
+  if [ "$ARCH" = "amd64" ]; then NVIM_ARCH="linux64"; else NVIM_ARCH="$ARCH"; fi && \
+  wget "https://github.com/neovim/neovim/releases/download/v0.10.2/nvim-$NVIM_ARCH.tar.gz" -O /tmp/nvim.tar.gz && \
+  tar -xzf /tmp/nvim.tar.gz -C /opt && \
+  ln -sf /opt/nvim-$NVIM_ARCH/bin/nvim /usr/local/bin/nvim && \
+  rm /tmp/nvim.tar.gz
 
 # Install Docker CLI
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg && \

@@ -56,7 +56,18 @@ for domain in \
     "api.anthropic.com" \
     "sentry.io" \
     "statsig.anthropic.com" \
-    "statsig.com"; do
+    "statsig.com" \
+    "tree-sitter.github.io" \
+    "codeload.github.com" \
+    "raw.githubusercontent.com" \
+    "objects.githubusercontent.com" \
+    "release-assets.githubusercontent.com"; do
+    # Note: Domains marked for neovim plugin support:
+    # - tree-sitter.github.io: Treesitter parser downloads
+    # - codeload.github.com: GitHub archive downloads for plugins
+    # - raw.githubusercontent.com: Raw file access for plugin configs
+    # - objects.githubusercontent.com: GitHub release assets
+    # - release-assets.githubusercontent.com: GitHub release downloads
     echo "Resolving $domain..."
     ips=$(dig +short A "$domain")
     if [ -z "$ips" ]; then
@@ -70,7 +81,7 @@ for domain in \
             exit 1
         fi
         echo "Adding $ip for $domain"
-        ipset add allowed-domains "$ip"
+        ipset add allowed-domains "$ip" 2>/dev/null || echo "  (already exists)"
     done < <(echo "$ips")
 done
 

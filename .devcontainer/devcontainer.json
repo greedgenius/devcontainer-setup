@@ -8,7 +8,8 @@
   },
   "runArgs": [
     "--cap-add=NET_ADMIN",
-    "--cap-add=NET_RAW"
+    "--cap-add=NET_RAW",
+    "--group-add=1"
   ],
   "customizations": {
     "vscode": {
@@ -51,7 +52,7 @@
   "workspaceMount": "source=${localWorkspaceFolder}/workspace,target=/workspace,type=bind,consistency=delegated",
   "workspaceFolder": "/workspace",
   "initializeCommand": "mkdir -p ${localWorkspaceFolder}/workspace",
-  "postCreateCommand": "mkdir -p /home/node/.config/claude && if [ -f /home/node/.claude/claude_desktop_config.json ]; then cp /home/node/.claude/claude_desktop_config.json /home/node/.config/claude/; fi && if [ \"$UNSAFE_MODE\" != \"true\" ]; then sudo /usr/local/bin/init-firewall.sh; else echo 'WARNING: Running in UNSAFE mode - firewall disabled'; fi",
+  "postCreateCommand": "mkdir -p /home/node/.config/claude && if [ -f /home/node/.claude/claude_desktop_config.json ]; then cp /home/node/.claude/claude_desktop_config.json /home/node/.config/claude/; fi && sudo chgrp daemon /var/run/docker.sock && if [ \"$UNSAFE_MODE\" != \"true\" ]; then sudo /usr/local/bin/init-firewall.sh; else echo 'WARNING: Running in UNSAFE mode - firewall disabled'; fi",
   "forwardPorts": [3000],
   "portsAttributes": {
     "3000": {

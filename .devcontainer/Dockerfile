@@ -22,7 +22,7 @@ RUN apt update && apt install -y less \
   jq \
   ca-certificates \
   curl \
-  vim
+  neovim
 
 # Install Docker CLI
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg && \
@@ -77,10 +77,19 @@ RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/
   -a "source /usr/share/doc/fzf/examples/completion.zsh" \
   -a "export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhistory/.bash_history" \
   -a "alias cld='claude --dangerously-skip-permissions'" \
+  -a "alias vim='nvim'" \
+  -a "alias vi='nvim'" \
   -x
 
 # Install Claude
 RUN npm install -g @anthropic-ai/claude-code
+
+# Setup neovim configuration
+USER root
+RUN mkdir -p /home/node/.config/nvim
+COPY nvim-init.lua /home/node/.config/nvim/init.lua
+RUN chown -R node:node /home/node/.config
+USER node
 
 # Copy and set up firewall script
 COPY init-firewall.sh /usr/local/bin/

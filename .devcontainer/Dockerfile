@@ -100,17 +100,28 @@ RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/
   -a "source /usr/share/doc/fzf/examples/completion.zsh" \
   -a "export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhistory/.bash_history" \
   -a "alias cld='claude --dangerously-skip-permissions'" \
+  -a "alias cldev='claude --dangerously-skip-permissions --config /home/node/.config/claude/claude_desktop_config.json'" \
   -a "alias vim='nvim'" \
   -a "alias vi='nvim'" \
   -x
 
-# Install Claude
-RUN npm install -g @anthropic-ai/claude-code
+# Install Claude and MCP servers for web development
+RUN npm install -g @anthropic-ai/claude-code \
+  @executeautomation/playwright-mcp-server \
+  @modelcontextprotocol/server-filesystem
+
+# Configure MCP servers for Claude CLI
+RUN claude mcp add playwright npx @executeautomation/playwright-mcp-server && \
+  claude mcp add filesystem npx @modelcontextprotocol/server-filesystem /workspace
 
 # Setup neovim configuration
 USER root
 RUN mkdir -p /home/node/.config/nvim
 COPY nvim-init.lua /home/node/.config/nvim/init.lua
+
+# Setup Claude configuration for container use
+RUN mkdir -p /home/node/.config/claude
+COPY claude-container-config.json /home/node/.config/claude/claude_desktop_config.json
 RUN chown -R node:node /home/node/.config
 
 # Pre-install Treesitter parsers and plugins to avoid network dependency at runtime

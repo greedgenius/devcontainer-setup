@@ -99,7 +99,7 @@ down: check-docker
 clean: check-docker
 	@echo "Cleaning up devcontainer..."
 	@docker ps -aq --filter "label=devcontainer.local_folder=$(PWD)" | xargs -r docker rm -f
-	@docker volume ls -q --filter "name=claude-code-bashhistory" | xargs -r docker volume rm
+	@docker volume ls -q --filter "name=claude-code-bashhistory" | xargs -r docker volume rm -f 2>/dev/null || true
 	@echo "✓ Cleanup complete"
 
 # Setup Claude commands

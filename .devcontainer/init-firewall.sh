@@ -61,28 +61,24 @@ for domain in \
     "codeload.github.com" \
     "raw.githubusercontent.com" \
     "objects.githubusercontent.com" \
-    "release-assets.githubusercontent.com" \
-    "cdn.playwright.dev"; do
+    "release-assets.githubusercontent.com"; do
     # Note: Domains marked for neovim plugin support:
     # - tree-sitter.github.io: Treesitter parser downloads
     # - codeload.github.com: GitHub archive downloads for plugins
     # - raw.githubusercontent.com: Raw file access for plugin configs
     # - objects.githubusercontent.com: GitHub release assets
     # - release-assets.githubusercontent.com: GitHub release downloads
-    # Note: Domains marked for Playwright browser downloads:
-    # - cdn.playwright.dev: Playwright browser binaries
     echo "Resolving $domain..."
-    # Use dig +short to resolve, filtering out CNAME records and getting only A records
-    ips=$(dig +short A "$domain" | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$')
+    ips=$(dig +short A "$domain")
     if [ -z "$ips" ]; then
-        echo "WARNING: No A records found for $domain, skipping..."
-        continue
+        echo "ERROR: Failed to resolve $domain"
+        exit 1
     fi
     
     while read -r ip; do
         if [[ ! "$ip" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-            echo "WARNING: Invalid IP from DNS for $domain: $ip, skipping..."
-            continue
+            echo "ERROR: Invalid IP from DNS for $domain: $ip"
+            exit 1
         fi
         echo "Adding $ip for $domain"
         ipset add allowed-domains "$ip" 2>/dev/null || echo "  (already exists)"

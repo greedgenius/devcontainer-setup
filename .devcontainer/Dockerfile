@@ -22,7 +22,9 @@ RUN apt update && apt install -y less \
   jq \
   ca-certificates \
   curl \
-  wget
+  wget \
+  python3-pip \
+  python3-venv
 
 # Install newer neovim (>= 0.8.0) from GitHub releases
 RUN ARCH=$(dpkg --print-architecture) && \
@@ -88,6 +90,8 @@ RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/
   -a "alias cld='claude --dangerously-skip-permissions'" \
   -a "alias vim='nvim'" \
   -a "alias vi='nvim'" \
+  -a "alias pip='sudo pip3'" \
+  -a "alias python='python3'" \
   -x
 
 # Install Claude
@@ -112,5 +116,6 @@ RUN chmod +x /usr/local/bin/init-firewall.sh && \
   echo "node ALL=(root) NOPASSWD: /usr/local/bin/init-firewall.sh" > /etc/sudoers.d/node-firewall && \
   echo "node ALL=(root) NOPASSWD: /bin/chgrp daemon /var/run/docker.sock" >> /etc/sudoers.d/node-firewall && \
   echo "node ALL=(root) NOPASSWD: /usr/bin/apt, /usr/bin/apt-get" >> /etc/sudoers.d/node-firewall && \
+  echo "node ALL=(root) NOPASSWD: /usr/bin/pip3, /usr/bin/python3 -m pip" >> /etc/sudoers.d/node-firewall && \
   chmod 0440 /etc/sudoers.d/node-firewall
 USER node

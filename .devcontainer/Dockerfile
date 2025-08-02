@@ -44,9 +44,9 @@ RUN curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /
 RUN mkdir -p /usr/local/share/npm-global && \
   chown -R node:node /usr/local/share
 
-# Add node user to the group that owns the Docker socket (GID 1)
-# This ensures Docker socket access works with the host's group
-RUN usermod -aG $(getent group 1 | cut -d: -f1) node
+# Add node user to the docker group (GID 350)
+# This ensures Docker socket access works with the host's docker group
+RUN groupadd -g 350 docker 2>/dev/null || true && usermod -aG docker node
 
 ARG USERNAME=node
 
@@ -114,7 +114,7 @@ COPY init-firewall.sh /usr/local/bin/
 USER root
 RUN chmod +x /usr/local/bin/init-firewall.sh && \
   echo "node ALL=(root) NOPASSWD: /usr/local/bin/init-firewall.sh" > /etc/sudoers.d/node-firewall && \
-  echo "node ALL=(root) NOPASSWD: /bin/chgrp daemon /var/run/docker.sock" >> /etc/sudoers.d/node-firewall && \
+  echo "node ALL=(root) NOPASSWD: /bin/chgrp docker /var/run/docker.sock" >> /etc/sudoers.d/node-firewall && \
   echo "node ALL=(root) NOPASSWD: /usr/bin/apt, /usr/bin/apt-get" >> /etc/sudoers.d/node-firewall && \
   echo "node ALL=(root) NOPASSWD: /usr/bin/pip3, /usr/bin/python3 -m pip" >> /etc/sudoers.d/node-firewall && \
   chmod 0440 /etc/sudoers.d/node-firewall

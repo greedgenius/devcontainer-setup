@@ -57,6 +57,14 @@ install-cli:
 # Start the devcontainer (with automatic Docker startup)
 up: start-docker
 	@echo "Starting devcontainer..."
+	@if [ ! -d workspace ] || [ -z "$$(ls -A workspace 2>/dev/null)" ]; then \
+		echo "Creating empty workspace with git repository..."; \
+		mkdir -p workspace; \
+		cd workspace && git init; \
+		echo "✓ Workspace created and initialized with git"; \
+	else \
+		echo "✓ Workspace already exists with content, skipping initialization"; \
+	fi
 	@devcontainer up --workspace-folder .
 	@echo "✓ Devcontainer is running"
 	@echo "Tip: Run 'make shell' to open a shell in the container"
@@ -65,6 +73,14 @@ up: start-docker
 up-unsafe: start-docker
 	@echo "WARNING: Starting devcontainer in UNSAFE mode with full internet access!"
 	@echo "This container can access any website and is less secure."
+	@if [ ! -d workspace ] || [ -z "$$(ls -A workspace 2>/dev/null)" ]; then \
+		echo "Creating empty workspace with git repository..."; \
+		mkdir -p workspace; \
+		cd workspace && git init; \
+		echo "✓ Workspace created and initialized with git"; \
+	else \
+		echo "✓ Workspace already exists with content, skipping initialization"; \
+	fi
 	@UNSAFE_MODE=true devcontainer up --workspace-folder .
 	@echo "✓ Unsafe devcontainer is running"
 	@echo "Tip: Run 'make shell-unsafe' to open a shell in the unsafe container"
